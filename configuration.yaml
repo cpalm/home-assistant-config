@@ -1,0 +1,242 @@
+default_config:
+
+homeassistant:
+  latitude: !secret lat_coord
+  longitude: !secret long_coord
+  elevation: 10
+  unit_system: metric
+  time_zone: Europe/Copenhagen
+  name: Home
+  packages: !include_dir_named packages
+  customize: !include customize.yaml
+
+lovelace:
+  mode: yaml
+
+icloud:
+  - username: !secret icloud_username
+    password: !secret icloud_password
+
+influxdb:
+  host: 192.168.1.102
+  port: 8086
+  database: MyDB
+  username: telegraf
+  password: !secret influxdb_password
+  ssl: false
+  verify_ssl: false
+  max_retries: 3
+  include:
+    entities:
+      - sensor.xi_temp_bath_temperature
+      - sensor.xi_temp_bedroom_temperature
+      - sensor.xi_temp_living_room_temperature
+      - sensor.ikea_bulb_1_temperature
+      - sensor.0x00158d0003232ae5_temperature
+      - sensor.vaskerum_temperatur
+      - sensor.temperatureandhumidity_10_0
+      - sensor.temperatureandhumidity_10_1
+      - sensor.drivhus_temperatur
+      - sensor.drivhus_luftfugtighed
+      - sensor.vaskerum_luftfugtighed
+       
+mqtt:
+  broker: mosquitto
+  port: 1883
+  client_id: home-assistant-1
+  discovery: true
+  birth_message:
+    topic: 'hass/status'
+    payload: 'online'
+  will_message:
+    topic: 'hass/status'
+    payload: 'offline'
+
+discovery:
+
+tplink:
+  discovery: false
+  switch:
+    - host: 192.168.1.126
+    - host: 192.168.1.89
+
+http:
+  base_url: !secret http_base_url
+
+mysensors:
+  gateways:
+    - device: mqtt
+      persistence_file: 'mysensors.json'
+      topic_in_prefix: 'mygateway1-out'
+      topic_out_prefix: 'mygateway1-in'
+  optimistic: false
+  persistence: true
+  retain: true
+  version: '2.3'
+
+notify:
+  - name: slack
+    platform: slack
+    api_key: !secret slack_api_key
+    default_channel: '#general'
+
+group: !include groups.yaml
+automation: !include automations.yaml
+script: !include scripts.yaml
+
+hue:
+  bridges:
+    - host: 192.168.1.21
+
+sonos:
+  media_player:
+    hosts: 192.168.1.20
+
+sensor:
+  - platform: mqtt
+    name: Zigbee2mqtt Networkmap
+    # if you change base_topic of Zigbee2mqtt, change state_topic accordingly
+    state_topic: zigbee2mqtt/bridge/networkmap/raw
+    value_template: >-
+      {{ now().strftime('%Y-%m-%d %H:%M:%S') }}
+    # again, if you change base_topic of Zigbee2mqtt, change json_attributes_topic accordingly
+    json_attributes_topic: zigbee2mqtt/bridge/networkmap/raw
+  - platform: mqtt
+    state_topic: "sigfox/greenhouse/temperature"
+    name: "Drivhus temperatur"
+    unit_of_measurement: '°C'
+    icon: "mdi:thermometer"
+    device_class: "temperature"
+    force_update: "true"
+  - platform: mqtt
+    state_topic: "sigfox/greenhouse/humidity"
+    name: "Drivhus luftfugtighed"
+    device_class: "humidity"
+    force_update: "true"
+  - platform: mqtt
+    state_topic: "sigfox/greenhouse/battery"
+    name: "Drivhus sensor batteri"
+    icon: "mdi:battery"
+    device_class: "battery"
+    force_update: "true"
+  - platform: mqtt
+    state_topic: "sigfox/micro-greenhouse/temperature"
+    name: "Mini drivhus temperatur"
+    unit_of_measurement: '°C'
+    icon: "mdi:thermometer"
+    device_class: "temperature"
+    force_update: "true"
+  - platform: mqtt
+    state_topic: "sigfox/micro-greenhouse/humidity"
+    name: "Mini drivhus luftfugtighed"
+    icon: "mdi:humidity"
+    device_class: "humidity"
+    force_update: "true"
+  - platform: mqtt
+    state_topic: "sigfox/micro-greenhouse/battery"
+    name: "Mini drivhus sensor batteri"
+    icon: "mdi:battery"
+    device_class: "battery"
+    force_update: "true"
+  - platform: mqtt
+    state_topic: "sigfox/sigfox-sensit-c/temperature"
+    name: "Kaninbur temperatur"
+    unit_of_measurement: '°C'
+    icon: "mdi:thermometer"
+    device_class: "temperature"
+    force_update: "true"
+  - platform: mqtt
+    state_topic: "sigfox/sigfox-sensit-c/humidity"
+    name: "Kaninbur luftfugtighed"
+    icon: "mdi:humidity"
+    device_class: "humidity"
+    force_update: "true"
+  - platform: mqtt
+    state_topic: "sigfox/sigfox-sensit-c/battery"
+    name: "Kaninbur sensor batteri"
+    icon: "mdi:battery"
+    device_class: "battery"
+    force_update: "true"
+  - platform: mqtt
+    state_topic: "sigfox/sigfox-sensit-d/temperature"
+    name: "sigfox-sensit-d temperatur"
+    unit_of_measurement: '°C'
+    icon: "mdi:thermometer"
+    device_class: "temperature"
+    force_update: "true"
+  - platform: mqtt
+    state_topic: "sigfox/sigfox-sensit-d/humidity"
+    name: "sigfox-sensit-d luftfugtighed"
+    icon: "mdi:humidity"
+    device_class: "humidity"
+    force_update: "true"
+  - platform: mqtt
+    state_topic: "sigfox/sigfox-sensit-d/battery"
+    name: "sigfox-sensit-d sensor batteri"
+    icon: "mdi:battery"
+    device_class: "battery"
+    force_update: "true"
+  - platform: mqtt
+    state_topic: "sigfox/sigfox-sensit-e/temperature"
+    name: "sigfox-sensit-e temperatur"
+    unit_of_measurement: '°C'
+    icon: "mdi:thermometer"
+    device_class: "temperature"
+    force_update: "true"
+  - platform: mqtt
+    state_topic: "sigfox/sigfox-sensit-e/humidity"
+    name: "sigfox-sensit-e luftfugtighed"
+    icon: "mdi:humidity"
+    device_class: "humidity"
+    force_update: "true"
+  - platform: mqtt
+    state_topic: "sigfox/sigfox-sensit-e/battery"
+    name: "sigfox-sensit-e sensor batteri"
+    icon: "mdi:battery"
+    device_class: "battery"
+    force_update: "true"
+  - platform: mqtt
+    state_topic: "garbage-collection/regular"
+    unique_id: "garbage-regular"
+    name: "Rest/mad"
+    value_template: "{{ value_json.pickupInDays }}"
+    icon: "mdi:trash-can-outline"
+  - platform: mqtt
+    state_topic: "garbage-collection/bulky"
+    unique_id: "garbage-bulky"
+    name: "Storskrald"
+    value_template: "{{ value_json.pickupInDays }}"
+    icon: "mdi:trash-can-outline"
+  - platform: mqtt
+    state_topic: "garbage-collection/plastic-and-paper"
+    unique_id: "garbage-plastic-and-paper"
+    name: "Plast og Papir"
+    value_template: "{{ value_json.pickupInDays }}"
+    icon: "mdi:trash-can-outline"
+  - platform: mqtt
+    state_topic: "garbage-collection/metal-glass"
+    unique_id: "garbage-metal-glass"
+    name: "Metal og Glas"
+    value_template: "{{ value_json.pickupInDays }}"
+    icon: "mdi:trash-can-outline"
+  - platform: mqtt
+    state_topic: "garbage-collection/garden"
+    unique_id: "garbage-garden"
+    name: "Haveaffald"
+    value_template: "{{ value_json.pickupInDays }}"
+    icon: "mdi:trash-can-outline"
+  - platform: mqtt
+    state_topic: "garbage-collection/cardboard"
+    unique_id: "garbage-cardboard"
+    name: "Pap"
+    value_template: "{{ value_json.pickupInDays }}"
+    icon: "mdi:trash-can-outline"
+
+binary_sensor:
+  - platform: mqtt
+    state_topic: "tele/RF_Bridge/RESULT"
+    value_template: '{{value_json.RfReceived.Data}}'
+    payload_on: '8B1AA8'
+    payload_off: '8B1AA8off'
+    name: "Button Doorbell"
+    off_delay: 1
