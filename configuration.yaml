@@ -17,6 +17,10 @@ icloud:
   - username: !secret icloud_username
     password: !secret icloud_password
 
+resources:
+  url: /hacsfiles/battery-state-card/battery-state-card.js
+  type: module
+
 influxdb:
   host: 192.168.1.102
   port: 8086
@@ -88,9 +92,8 @@ hue:
   bridges:
     - host: 192.168.1.21
 
-sonos:
-  media_player:
-    hosts: 192.168.1.20
+recorder:
+  db_url: !secret recorder_db_url
 
 sensor:
   - platform: mqtt
